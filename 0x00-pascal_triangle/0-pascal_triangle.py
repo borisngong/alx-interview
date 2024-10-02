@@ -18,7 +18,7 @@ def pascal_triangle(n):
     if n <= 0:
         return []
 
-    triangle = [[1]]
+    p_triangle = [[1]]
     """Initialize the triangle with the first row"""
 
     for i in range(1, n):
@@ -26,9 +26,9 @@ def pascal_triangle(n):
         row = [1]
         """middle vlues generation"""
         for j in range(1, i):
-            row.append(triangle[i-1][j-1] + triangle[i-1][j])
+            row.append(p_triangle[i-1][j-1] + p_triangle[i-1][j])
         """row should end with 1"""
         row.append(1)
-        triangle.append(row)
+        p_triangle.append(row)
 
-    return triangle
+    return p_triangle
