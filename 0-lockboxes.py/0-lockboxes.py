@@ -60,7 +60,7 @@ def canUnlockAll(boxes):
 
 def main():
     """Test function."""
-    print(canUnlockAll([[]]))
+    canUnlockAll([[]])
 
 
 if __name__ == '__main__':
