@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/python3
 """
 A module to find the minimum number of operations required to get exactly
 n 'H' characters using the "Copy All" and "Paste" operations
