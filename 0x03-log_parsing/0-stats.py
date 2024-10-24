@@ -1,54 +1,76 @@
-#!/usr/bin/python3
+#!/usr/bin/env python3
 """
-Log Processor Script that tracks reads HTTP request logs from
-standard input and tracks Total file size, Counts of specific
-HTTP status codes
+This module contains log statistics for HTTP request logs
+It parses logs, counts status codes, and sums file sizes and displayed
+at regular intervals until termination
 """
 import sys
+import re
 
 
-def print_statistics(status_code_counts, total_file_size):
+def initialize_logs():
     """
-    Method to print the statistics of the log file
+    Initialize the logs dictionary with file size and status codes
     """
-    print("File size: {}".format(total_file_size))
-    for status_code, count in sorted(status_code_counts.items()):
-        if count != 0:
-            print("{}: {}".format(status_code, count))
+    status_codes = [200, 301, 400, 401, 403, 404, 405, 500]
+    logs = {
+        'file_size': 0,
+        'code_list': {str(code): 0 for code in status_codes}
+    }
+    return logs
 
 
-total_file_size = 0
-status_code_count = {
-    "200": 0,
-    "301": 0,
-    "400": 0,
-    "401": 0,
-    "403": 0,
-    "404": 0,
-    "405": 0,
-    "500": 0
-}
+def parse_line(line, regex, logs):
+    """
+    Parse a single line of the log file, updating logs with file size
+    and status codes
+    """
+    match = regex.fullmatch(line)
+    if match:
+        status_code, file_size = match.group(3), match.group(4)
+        logs['file_size'] += int(file_size)
+        if status_code.isdecimal() and status_code in logs['code_list']:
+            logs['code_list'][status_code] += 1
+    return logs
 
-line_count = 0
 
-try:
-    for line in sys.stdin:
-        parsed_line = line.split()  # Splitting the line into components
-        parsed_line = parsed_line[::-1]  # Reversing the order of components
+def display_logs(logs):
+    """
+    Display the current logs with file size and status code counts
+    """
+    print(f"File size: {logs['file_size']}")
+    for code, count in sorted(logs['code_list'].items()):
+        if count > 0:
+            print(f"{code}: {count}")
 
-        if len(parsed_line) > 2:
-            line_count += 1
 
-            if line_count <= 10:
-                file_size = int(parsed_line[0])  # File size is now clearer
-                status_code = parsed_line[1]  # Status code is now clearer
+def main():
+    """
+    Main function to read lines from stdin, parse them, and display logs.
 
-                if status_code in status_code_count.keys():
-                    status_code_count[status_code] += 1
+    It will display logs every 10 lines and catch KeyboardInterrupt to
+    gracefully exit, showing the final logs before termination.
+    """
+    regex = re.compile(
+        r'(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}) - \[(.*?)\] "GET '
+        r'/projects/\d+ HTTP/1\.1" (\d{3}) (\d+)'
+    )
+    line_count = 0
+    logs = initialize_logs()
 
-            if line_count == 10:
-                print_statistics(status_code_count, total_file_size)
-                line_count = 0
+    try:
+        for line in sys.stdin:
+            line = line.strip()
+            if line:
+                logs = parse_line(line, regex, logs)
+                line_count += 1
+                if line_count % 10 == 0:
+                    display_logs(logs)
+    except BrokenPipeError:
+        sys.stderr.write("Broken pipe error occurred.\n")
+    finally:
+        display_logs(logs)
 
-finally:
-    print_statistics(status_code_count, total_file_size)
+
+if __name__ == '__main__':
+    main()
