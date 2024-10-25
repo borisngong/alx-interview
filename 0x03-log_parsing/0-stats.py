@@ -42,8 +42,8 @@ try:
         if len(parsed_line) > 2:
             try:
                 # Extract file size and status code from the line
-                file_size = int(parsed_line[-1])  # File size is the last component
-                status_code = parsed_line[-2]  # Status code is the second-to-last component
+                file_size = int(parsed_line[-1])
+                status_code = parsed_line[-2]
 
                 # Increment the total file size
                 total_file_size += file_size
@@ -53,7 +53,6 @@ try:
                     status_code_count[status_code] += 1
 
             except (ValueError, IndexError):
-                # Skip line if there's an issue with parsing the file size or status code
                 continue
 
             # Increment the line counter
