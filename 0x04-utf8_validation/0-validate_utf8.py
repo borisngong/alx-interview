@@ -9,7 +9,7 @@ def validUTF8(data):
     for num in data:
         # Get only the least significant 8 bits of the integer
         byte = num & 0xFF
-        
+
         if remaining_bytes == 0:
             # Determine the number of bytes based on the first byte
             if (byte >> 7) == 0:
